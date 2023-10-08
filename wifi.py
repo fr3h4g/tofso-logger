@@ -14,13 +14,11 @@ def connect():
         if wlan.status() < 0 or wlan.status() >= 3:
             break
         max_wait -= 1
-        print("waiting for connection...")
+        print("Waiting for connection...")
         time.sleep(1)
 
     # Handle connection error
     if wlan.status() != 3:
-        raise RuntimeError("network connection failed")
+        raise RuntimeError("Network connection failed")
 
-    print("connected")
-    status = wlan.ifconfig()
-    print(status)
+    print(f"Connected to wifi '{ssid}'")

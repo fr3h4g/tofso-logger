@@ -22,3 +22,4 @@ def connect():
         raise RuntimeError("Network connection failed")
 
     print(f"Connected to wifi '{ssid}'")
+    return wlan

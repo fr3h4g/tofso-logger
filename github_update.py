@@ -16,6 +16,7 @@ def get_trees(version: str):
     headers = {"User-Agent": "tofso-logger"}
     url = f"https://api.github.com/repos/fr3h4g/tofso-logger/git/trees/{version}?recursive=1"
     response = urequests.get(url, headers=headers)
+    response.close()
     # print(response.text)
     return json.loads(response.text)["tree"]
 
@@ -26,6 +27,7 @@ def pull_file(filename: str, tag: str):
     url = f"https://raw.githubusercontent.com/fr3h4g/tofso-logger/{tag}/{filename}"
     # print(url)
     response = urequests.get(url, headers=headers)
+    response.close()
     # print(response.text)
     with open(filename, "w", encoding="utf8") as file:
         file.write(response.text)
@@ -37,6 +39,7 @@ def check_new_release(force_new_release=False):
     headers = {"User-Agent": "tofso-logger"}
     url = "https://api.github.com/repos/fr3h4g/tofso-logger/releases"
     response = urequests.get(url, headers=headers)
+    response.close()
     # print(response.text)
     if response.status_code == 200:
         releases = json.loads(response.text)

@@ -12,11 +12,11 @@ def update_infuxdb(data):
     headers = {"Authorization": token}
 
     response = urequests.post(settings.influxdb_url, data=data, headers=headers)
-    response.close()
     if response.status_code == 204:
         print("Done")
     else:
         print(f"Error: {response.status_code} - {response.text}")
+    response.close()
 
 
 if __name__ == "__main__":

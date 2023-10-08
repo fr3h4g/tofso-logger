@@ -16,8 +16,6 @@ def get_trees(version: str):
     headers = {"User-Agent": "tofso-logger"}
     url = f"https://api.github.com/repos/fr3h4g/tofso-logger/git/trees/{version}?recursive=1"
     response = urequests.get(url, headers=headers)
-    if response is not None:
-        response.close()
     # print(response.text)
     return json.loads(response.text)["tree"]
 

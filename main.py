@@ -7,12 +7,15 @@ import settings
 
 def update_infuxdb(data):
     print("Sending data to influxdb...", end="")
-    headers = {"Authorization": f"Bearer {settings.influxdb_token}"}
+
+    token = f"Bearer {settings.influxdb_token}"
+    headers = {"Authorization": token}
+
     response = urequests.post(settings.influxdb_url, data=data, headers=headers)
     if response.status_code == 204:
         print("Done")
     else:
-        print(f"Error: {response.text}")
+        print(f"Error: {response.status_code} - {response.text}")
 
 
 if __name__ == "__main__":

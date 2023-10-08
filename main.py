@@ -61,7 +61,7 @@ def check_new_release(force_new_release=False):
 
 
 def download_release(version):
-    print(f"Updating firmware with release {version}...")
+    print(f"Updating firmware to release {version}...")
 
     trees = get_trees(version)
     for file in trees:
@@ -75,7 +75,7 @@ def download_release(version):
             pull_file(file["path"], version)
 
     with open(".current_version", "w", encoding="utf8") as file:
-        file.write(new_relase)
+        file.write(version)
 
     print("Update complete, resetting device in 10 seconds")
     time.sleep(10)

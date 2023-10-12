@@ -14,7 +14,7 @@ def update_infuxdb(data):
 
     try:
         response = urequests.post(settings.influxdb_url, data=data, headers=headers)
-    except OSError as exc:
+    except Exception as exc:
         print(f"Error: {exc}")
         return False
     response.close()
@@ -27,7 +27,7 @@ def update_infuxdb(data):
         return False
 
 
-def get_rssi_level():
+def get_rssi_level(wlan):
     return wlan.status("rssi")
 
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     error_count = 0
     while True:
         if x > 10000:
-            rssi = get_rssi_level()
+            rssi = get_rssi_level(wlan)
             data = f"Test RSSI={rssi}"
 
             sent_ok = update_infuxdb(data)
@@ -50,8 +50,9 @@ if __name__ == "__main__":
                 error_count = 0
             x = 0
 
-            if error_count >= 10:
-                machine.soft_reset()
+            if error_count >= 5:
+                print("Error sending data to InfluxDB, reseting device")
+                machine.reset()
 
         time.sleep_ms(1)
         x += 1

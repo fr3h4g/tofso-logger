@@ -35,10 +35,11 @@ if __name__ == "__main__":
     wlan = wifi.connect()
     github_update.update_firmware()
 
-    x = 0
+    send_influxdb_data_wait = 0
+    check_for_firmware_update_wait = 0
     error_count = 0
     while True:
-        if x > 10000:
+        if send_influxdb_data_wait > 10_000:
             rssi = get_rssi_level(wlan)
             data = f"Test RSSI={rssi}"
 
@@ -48,11 +49,18 @@ if __name__ == "__main__":
                 print(f"Error count: {error_count}")
             else:
                 error_count = 0
-            x = 0
+            send_influxdb_data_wait = 0
 
             if error_count >= 5:
                 print("Error sending data to InfluxDB, reseting device")
                 machine.reset()
 
+        if check_for_firmware_update_wait > 100_000:
+            if github_update.check_new_release():
+                time.sleep(10)
+                machine.reset()
+            check_for_firmware_update_wait = 0
+
         time.sleep_ms(1)
-        x += 1
+        send_influxdb_data_wait += 1
+        check_for_firmware_update_wait += 1

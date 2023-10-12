@@ -6,10 +6,13 @@ import machine
 
 
 def update_firmware():
-    new_relase = check_new_release()
+    try:
+        new_relase = check_new_release()
 
-    if new_relase:
-        download_release(new_relase)
+        if new_relase:
+            download_release(new_relase)
+    except Exception as exc:
+        print(f"Error updating firmware, {exc}")
 
 
 def get_trees(version: str):

@@ -32,14 +32,19 @@ def get_rssi_level(wlan):
 
 
 if __name__ == "__main__":
+    led = machine.Pin("LED", machine.Pin.OUT)
+    led.value(1)
+
     wlan = wifi.connect()
     github_update.update_firmware()
 
     send_influxdb_data_wait = 0
+    led_blink_wait = 0
     check_for_firmware_update_wait = 0
     error_count = 0
     while True:
         if send_influxdb_data_wait > 10_000:
+            led.value(1)
             rssi = get_rssi_level(wlan)
             data = f"Test RSSI={rssi}"
 
@@ -56,11 +61,19 @@ if __name__ == "__main__":
                 machine.reset()
 
         if check_for_firmware_update_wait > 100_000:
+            led.value(1)
             if github_update.check_new_release():
                 time.sleep(10)
                 machine.reset()
             check_for_firmware_update_wait = 0
 
+        if led_blink_wait > 1_000:
+            led.value(1)
+            time.sleep_ms(50)
+            led.value(0)
+            led_blink_wait = 0
+
         time.sleep_ms(1)
         send_influxdb_data_wait += 1
         check_for_firmware_update_wait += 1
+        led_blink_wait += 1

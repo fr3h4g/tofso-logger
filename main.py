@@ -4,6 +4,7 @@ import urequests
 import time
 import settings
 import machine
+import dht
 
 
 def update_infuxdb(data):
@@ -28,12 +29,22 @@ def update_infuxdb(data):
 
 
 def get_rssi_level(wlan):
-    return wlan.status("rssi")
+    rssi = wlan.status("rssi")
+    return rssi
+
+
+def get_temp_humid(sensor):
+    sensor.measure()
+    temperature = sensor.temperature()
+    humidity = sensor.humidity()
+    return temperature, humidity
 
 
 if __name__ == "__main__":
     led = machine.Pin("LED", machine.Pin.OUT)
     led.value(1)
+
+    sensor = dht.DHT11(machine.Pin(2))
 
     wlan = wifi.connect()
     github_update.update_firmware()
@@ -45,8 +56,11 @@ if __name__ == "__main__":
     while True:
         if send_influxdb_data_wait > 10_000:
             led.value(1)
+
+            temp, humid = get_temp_humid(sensor)
             rssi = get_rssi_level(wlan)
-            data = f"Test RSSI={rssi}"
+
+            data = f"Test RSSI={rssi}\nTest Temperature={temp}\nTest Humidity={humid}"
 
             sent_ok = update_infuxdb(data)
             if not sent_ok:

@@ -36,26 +36,30 @@ def pull_file(filename: str, tag: str):
 
 def check_new_release(force_new_release=False):
     print("Checking for new release on github repo fr3h4g/tofso-logger...", end="")
-    headers = {"User-Agent": "tofso-logger"}
-    url = "https://api.github.com/repos/fr3h4g/tofso-logger/releases"
-    response = urequests.get(url, headers=headers)
-    # print(response.text)
-    if response.status_code == 200:
-        releases = json.loads(response.text)
-        if releases:
-            latest_version = releases[0]["tag_name"]
+    try:
+        headers = {"User-Agent": "tofso-logger"}
+        url = "https://api.github.com/repos/fr3h4g/tofso-logger/releases"
+        response = urequests.get(url, headers=headers)
+        # print(response.text)
+        if response.status_code == 200:
+            releases = json.loads(response.text)
+            if releases:
+                latest_version = releases[0]["tag_name"]
 
-            current_version = None
-            if ".current_version" in os.listdir():
-                with open(".current_version", "r", encoding="utf8") as file:
-                    current_version = file.read()
-            if force_new_release:
-                print(f"New release found {latest_version}")
-                return latest_version
+                current_version = None
+                if ".current_version" in os.listdir():
+                    with open(".current_version", "r", encoding="utf8") as file:
+                        current_version = file.read()
+                if force_new_release:
+                    print(f"New release found {latest_version}")
+                    return latest_version
 
-            if current_version != latest_version:
-                print(f"New release found {latest_version}")
-                return latest_version
+                if current_version != latest_version:
+                    print(f"New release found {latest_version}")
+                    return latest_version
+    except Exception as exc:
+        print(f"Error: {exc}")
+        return None
 
     print("No new release found")
     return None

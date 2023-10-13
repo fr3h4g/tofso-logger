@@ -38,7 +38,7 @@ def check_new_release(force_new_release=False):
     print("Checking for new release on github repo fr3h4g/tofso-logger...", end="")
     try:
         headers = {"User-Agent": "tofso-logger"}
-        url = "https://api.github.com/repos/fr3h4g/tofso-logger/releases"
+        url = "https://api.github.com/repos/fr3h4g/tofso-logger/releases?per_page=1"
         response = urequests.get(url, headers=headers)
         # print(response.text)
         if response.status_code == 200:

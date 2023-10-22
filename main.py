@@ -6,6 +6,7 @@ import settings
 import machine
 import dht
 import random
+from oled import Display
 
 count_meter_1 = 0
 count_meter_2 = 0
@@ -14,6 +15,7 @@ error_count = 0
 
 def update_infuxdb(data):
     print("Sending data to influxdb...", end="")
+    display.print("Sending data...")
 
     token = f"Bearer {settings.influxdb_token}"
     headers = {"Authorization": token}
@@ -25,8 +27,12 @@ def update_infuxdb(data):
         print(f"Error: {exc}")
         return False
 
+    display.print(f"{response.status_code}")
+
     if response.status_code == 204:
         print("Done")
+        display.print("Done")
+
         return True
     else:
         print(f"Error: {response.status_code} - {response.text}")
@@ -89,8 +95,13 @@ def update(Source):
 
 
 if __name__ == "__main__":
+    global display
     led = machine.Pin("LED", machine.Pin.OUT)
     pwm0 = machine.PWM(machine.Pin(0), freq=100, duty_u16=1000)
+
+    display = Display()
+
+    display.print("Startup")
 
     led.value(1)
 
@@ -99,7 +110,9 @@ if __name__ == "__main__":
 
     sensor = dht.DHT11(machine.Pin(2))
 
-    wlan = wifi.connect()
+    display.print("Connecting to WIFI")
+
+    wlan = wifi.connect(display)
     github_update.update_firmware()
 
     error_count = 0
@@ -114,6 +127,9 @@ if __name__ == "__main__":
     tim = machine.Timer(period=10_000, mode=machine.Timer.PERIODIC, callback=send_data)
 
     tim2 = machine.Timer(period=300_000, mode=machine.Timer.PERIODIC, callback=update)
+
+    display.print("Startup done")
+    display.print("Running program")
 
     while True:
         try:

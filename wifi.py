@@ -4,7 +4,7 @@ from settings import ssid, password
 import machine
 
 
-def connect(display):
+def connect():
     wlan = None
     try:
         wlan = network.WLAN(network.STA_IF)
@@ -13,7 +13,6 @@ def connect(display):
     except Exception as exc:
         print(f"Error: {exc}")
         print("Error connecting to wifi, reseting device in 10 seconds")
-        display.print('Error')
         time.sleep(10)
         machine.reset()
 
@@ -25,16 +24,13 @@ def connect(display):
                 break
             max_wait -= 1
             print("Waiting for connection...")
-            display.print("Waiting for connection...")
             time.sleep(1)
 
         # Handle connection error
         if wlan.status() != 3:
             print("Error connecting to wifi, reseting device in 10 seconds")
-            display.print('Error')
             time.sleep(10)
             machine.reset()
 
-        print(f"Connected to wifi {ssid}")
-        display.print("Connected to wifi")
+        print(f"Connected to wifi '{ssid}'")
         return wlan

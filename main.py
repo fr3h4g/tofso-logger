@@ -6,10 +6,12 @@ import settings
 import machine
 import dht
 import random
+from machine import WDT
 
 count_meter_1 = 0
 count_meter_2 = 0
 error_count = 0
+wdt = None
 
 
 def update_infuxdb(data):
@@ -56,7 +58,7 @@ def TriggerCountMeter2(Source):
 
 
 def send_data(Source):
-    global count_meter_1, count_meter_2, error_count, led, sensor, wlan
+    global count_meter_1, count_meter_2, error_count, led, sensor, wlan, wtd
     led.value(1)
 
     # temp, humid = get_temp_humid(sensor)
@@ -65,7 +67,6 @@ def send_data(Source):
     rssi = get_rssi_level(wlan)
 
     data = f"Test RSSI={rssi}\nTest Temperature={temp}\nTest Humidity={humid}\nTest Meter_1={count_meter_1}\nTest Meter_2={count_meter_2}"
-    print(data)
     count_meter_1 = 0
     count_meter_2 = 0
 
@@ -79,9 +80,15 @@ def send_data(Source):
     if error_count >= 5:
         print("Error sending data to InfluxDB, reseting device")
         machine.reset()
+    
+    wdt.feed()
 
     led.value(0)
 
+def feed_watchdog(Source):
+    global wdt
+    wdt.feed()
+    print("wdt_feed")
 
 def update(Source):
     led.value(1)
@@ -92,6 +99,9 @@ def update(Source):
 
 
 if __name__ == "__main__":
+    wdt = WDT(timeout=5_000)
+    tim_wdt = machine.Timer(period=1000, mode=machine.Timer.PERIODIC, callback=feed_watchdog)
+
     led = machine.Pin("LED", machine.Pin.OUT)
     pwm0 = machine.PWM(machine.Pin(0), freq=100, duty_u16=1000)
 
@@ -104,7 +114,7 @@ if __name__ == "__main__":
 
     wlan = wifi.connect()
     github_update.update_firmware()
-
+    
     error_count = 0
 
     triggerPinMeter1.irq(
@@ -118,8 +128,11 @@ if __name__ == "__main__":
 
     tim2 = machine.Timer(period=300_000, mode=machine.Timer.PERIODIC, callback=update)
 
+    tim_wdt.deinit()
+
     while True:
         try:
+            wdt.feed()
             led.value(1)
             time.sleep_ms(50)
             led.value(0)
@@ -129,3 +142,4 @@ if __name__ == "__main__":
             tim.deinit()
             tim2.deinit()
             machine.soft_reset()
+
